@@ -10,7 +10,7 @@ public:
       if(n==1)
       return 1;   // Base case 2nd
 
-        return fib(n-2)+fib(n-1);
+        return fib(n-1)+fib(n-2);
 
 
     }
