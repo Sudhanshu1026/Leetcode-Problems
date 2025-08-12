@@ -11,31 +11,47 @@
 class Solution {
 public:
     ListNode* rotateRight(ListNode* head, int k) {
-        if (!head || !head->next || k == 0) return head;
+        //Basic Edge cases!!
+        if (head==NULL || head->next==NULL ) 
+        return head;
+
+
 
         // Count nodes and get last node
-        int count = 1; 
-        ListNode* last = head;
-        while (last->next != NULL) {
+        int count = 0;
+        ListNode *temp=head;
+        while(temp){
             count++;
-            last = last->next;
-        }
-
+            temp=temp->next;
+        } 
+      
         k = k % count;
-        if (k == 0) return head;
+        // Edge case:if k=0. -> No need to rotate
+        if (k == 0) 
+        return head;
 
-        int steps = count - k;
+         count = count - k;
         ListNode* prev = NULL;
         ListNode* curr = head;
 
-        while (steps--) {
+        while (count--) {
             prev = curr;
             curr = curr->next;
         }
 
-        last->next = head;
         prev->next = NULL;
 
-        return curr;
+      //Create a tail pointer and move it to end
+        ListNode *tail=curr; 
+        while(tail->next!=NULL)
+        tail=tail->next;
+     
+    //Link last node and first node
+    tail->next=head;
+    head=curr;
+
+
+
+        return head;
     }
 };
