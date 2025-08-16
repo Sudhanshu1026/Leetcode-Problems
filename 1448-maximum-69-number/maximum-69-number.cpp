@@ -21,8 +21,8 @@ public:
         
          // rebuild the number
         int result = 0;
-        for (int d : digits) {
-            result = result * 10 + d;
+        for (int i=0;i<digits.size();i++) {
+            result = result * 10 + digits[i];
         }
 
         return result;
