@@ -1,59 +1,132 @@
 class Solution {
-    int minimumSum(vector<vector<int>> &grid, int u, int d, int l, int r) {
-        int min_i = grid.size(), max_i = 0;
-        int min_j = grid[0].size(), max_j = 0;
-        for (int i = u; i <= d; i++) {
-            for (int j = l; j <= r; j++) {
-                if (grid[i][j] == 1) {
-                    min_i = min(min_i, i);
-                    min_j = min(min_j, j);
-                    max_i = max(max_i, i);
-                    max_j = max(max_j, j);
-                }
-            }
-        }
-        return min_i <= max_i ? (max_i - min_i + 1) * (max_j - min_j + 1)
-                              : INT_MAX / 3;
-    }
-
-    vector<vector<int>> rotate(vector<vector<int>> &vec) {
-        int n = vec.size(), m = vec[0].size();
-        vector<vector<int>> ret(m, vector<int>(n));
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                ret[m - j - 1][i] = vec[i][j];
-            }
-        }
-        return ret;
-    }
-
-    int solve(vector<vector<int>> &grid) {
-        int n = grid.size(), m = grid[0].size();
-        int res = n * m;
-        for (int i = 0; i + 1 < n; i++) {
-            for (int j = 0; j + 1 < m; j++) {
-                res =
-                    min(res, minimumSum(grid, 0, i, 0, m - 1) +
-                                 minimumSum(grid, i + 1, n - 1, 0, j) +
-                                 minimumSum(grid, i + 1, n - 1, j + 1, m - 1));
-                res = min(res, minimumSum(grid, 0, i, 0, j) +
-                                   minimumSum(grid, 0, i, j + 1, m - 1) +
-                                   minimumSum(grid, i + 1, n - 1, 0, m - 1));
-            }
-        }
-        for (int i = 0; i + 2 < n; i++) {
-            for (int j = i + 1; j + 1 < n; j++) {
-                res = min(res, minimumSum(grid, 0, i, 0, m - 1) +
-                                   minimumSum(grid, i + 1, j, 0, m - 1) +
-                                   minimumSum(grid, j + 1, n - 1, 0, m - 1));
-            }
-        }
-        return res;
-    }
-
 public:
-    int minimumSum(vector<vector<int>> &grid) {
-        auto rgrid = rotate(grid);
-        return min(solve(grid), solve(rgrid));
+    // Function to calculate the minimum area of rectangle enclosing all ones in a submatrix 
+    int minimumArea(vector<vector<int>>& grid, int st_i, int en_i, int st_j, int en_j) {
+        int i, j, start_row = 1e9, end_row = -1, start_col = 1e9, end_col = -1, found = 0;
+        for(i=st_i;i<=en_i;i++)    for(j=st_j;j<=en_j;j++){
+            if(grid[i][j]){
+                start_row = min(start_row, i);
+                end_row = max(end_row, i);
+                start_col = min(start_col, j);
+                end_col = max(end_col, j);
+                found = 1;
+            }
+        }
+        return found ? ((end_row - start_row + 1) * (end_col - start_col + 1)) : 0;
+    }
+    
+    int minimumSum(vector<vector<int>>& grid) {
+        int i, j, m = grid.size(), n = grid[0].size(), ans = 1e9, one, two, three;
+
+        /*
+        -------------
+        |    (1)    |
+        |           |
+        -------------
+        | (2) | (3) |
+        |     |     |
+        -------------
+        */
+        for(i=0;i<m;i++){
+            one = minimumArea(grid, 0, i, 0, n - 1);
+            for(j=0;j<n;j++){
+                two = minimumArea(grid, i + 1, m - 1, 0, j);
+                three = minimumArea(grid, i + 1, m - 1, j+1, n-1);
+                ans = min(ans, one + two + three);
+            }
+        }
+        
+        /*
+        -------------
+        |     | (2) |
+        |     |     |
+          (1) -------
+        |     |     |
+        |     | (3) |
+        -------------
+        */
+        for(j=0;j<n;j++){
+            one = minimumArea(grid, 0, m-1, 0, j);
+            for(i=0;i<m;i++){
+                two = minimumArea(grid, 0, i, j+1, n-1);
+                three = minimumArea(grid, i + 1, m - 1, j+1, n-1);
+                ans = min(ans, one + two + three);
+            }
+        }
+        
+        /*
+        -------------
+        |     |     |
+        | (2) |     |
+        ------- (1) |
+        |     |     |
+        | (3) |     |
+        -------------
+        */
+        for(j=n-1;j>=0;j--){
+            one = minimumArea(grid, 0, m-1, j+1, n-1);
+            for(i=0;i<m;i++){
+                two = minimumArea(grid, 0, i, 0, j);
+                three = minimumArea(grid, i + 1, m - 1, 0, j);
+                ans = min(ans, one + two + three);
+            }
+        }
+                
+                
+        /*
+        -------------
+        | (2) | (3) |
+        |     |     |
+        ------------
+        |           |
+        |    (1)    |
+        -------------
+        */
+        for(i=m-1;i>=0;i--){
+            one = minimumArea(grid, i+1, m-1, 0, n - 1);
+            for(j=0;j<n;j++){
+                two = minimumArea(grid, 0, i, 0, j);
+                three = minimumArea(grid, 0, i, j+1, n-1);
+                ans = min(ans, one + two + three);
+            }
+        }
+        
+        /*
+        -------------
+        |    (1)    |
+        -------------
+        |    (2)    |
+        -------------
+        |    (3)    |
+        -------------
+        */
+        for(i=0;i<m;i++){
+            for(j=i+1;j<m;j++){
+                one = minimumArea(grid, 0, i, 0, n-1);
+                two = minimumArea(grid, i+1, j, 0, n-1);
+                three = minimumArea(grid, j+1, m-1, 0, n-1);
+                ans = min(ans, one + two + three);
+            }
+        }
+        
+         /*
+        -------------
+        |   |   |   |
+        |   |   |   |
+        |(1)|(2)|(3)|
+        |   |   |   |
+        |   |   |   |
+        -------------
+        */        
+        for(i=0;i<n;i++){
+            for(j=i+1;j<n;j++){
+                one = minimumArea(grid, 0, m-1, 0, i);
+                two = minimumArea(grid, 0, m-1, i+1, j);
+                three = minimumArea(grid, 0, m-1, j+1, n-1);
+                ans = min(ans, one + two + three);
+            }
+        }
+        
+        return ans;
     }
 };
